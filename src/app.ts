@@ -1,29 +1,14 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { HttpError } from 'http-errors';
-import logger from './config/logger';
+import express, { Request, Response } from 'express';
+import { globalErrorHandler } from './globalErrorHandler';
 
 const app = express();
 
-app.get('/', async (req, res) => {
-    res.send('Welcome to auth service');
+app.get('/', async (req: Request, res: Response) => {
+    const name = (req.query.name as string) || '';
+    res.status(200).send('Welcome to auth service: ' + name);
 });
 
 // global error handler; keep this last
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-    logger.error(err.message);
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
-        errors: [
-            {
-                type: err.name,
-                message: err.message,
-                path: '',
-                location: '',
-            },
-        ],
-    });
-});
+app.use(globalErrorHandler);
 
 export default app;
